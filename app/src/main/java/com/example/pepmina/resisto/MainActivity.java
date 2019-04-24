@@ -3,7 +3,9 @@ package com.example.pepmina.resisto;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -18,16 +20,23 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_GET_SINGLE_FILE =0;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    ImageView buckysImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //define Pick from gallery button
-        final Button button = findViewById(R.id.pickFromGalleryButton);
+        final Button pickFromGalleryButton = findViewById(R.id.pickFromGalleryButton);
+        Button buckyButton = (Button) findViewById(R.id.captureButton);
+        buckysImageView = (ImageView) findViewById(R.id.imageView);
+        //Disable the button if the user has no camera
+        if(!hasCamera())
+            buckyButton.setEnabled(false);
         // pick from gallery on click method
         // On click of the  button, start startActivityForResult
-        button.setOnClickListener(new View.OnClickListener() {
+        pickFromGalleryButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 // This segment is used to choose an image from Gallery
@@ -37,7 +46,25 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"),REQUEST_GET_SINGLE_FILE);
             }
         });
+        buckyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                //take photo from camera
+                launchCamera(v);
+            }
+        });
     }
+    //Check if the user has a camera
+    private boolean hasCamera(){
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+    }
+    //Launching the camera
+    public void launchCamera(View view){
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //Take a picture and pass results along to onActivityResult
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+    }
+
     // Get the real path from the URI
     public String getPathFromURI(Uri contentUri) {
         String res = null;
@@ -68,6 +95,13 @@ public class MainActivity extends AppCompatActivity {
                     ImageView imageView=findViewById(R.id.imageView);
                     imageView.setImageURI(selectedImageUri);
                     //ImageView((ImageView) findViewById(R.id.imageView)).setImageURI(selectedImageUri);
+                }
+                else if(requestCode == REQUEST_IMAGE_CAPTURE)
+                {
+                    //Get the photo
+                    Bundle extras = data.getExtras();
+                    Bitmap photo = (Bitmap) extras.get("data");
+                    buckysImageView.setImageBitmap(photo);
                 }
             }
         } catch (Exception e) {
