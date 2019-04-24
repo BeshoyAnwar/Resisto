@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Resisto</string>
+    <string name="TakePhotoButton">Take Photo</string>
+    <string name="PickFromGalleryButton">Pick From Gallery</string>
+    <string name="ImageVIew">Picture</string>
+</resources>
