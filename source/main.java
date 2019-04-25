@@ -180,267 +180,49 @@ public class main {
 
         return colors;
     }
-
-    public static void main(String[] args){
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        for (int j=0;j<COLOR_BOUNDS.length;j++){
-            for(int i=0;i<names.length;i++){
-                String in_path="in\\"+names[i]+".png";
-                String out_path="out\\"+names[j]+"_range_"+names[i]+"_input"+".png";
-                Mat source = Imgcodecs.imread(in_path);//read input image
-                Mat dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-                Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-                Mat mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
+	
+    public static ArrayList<String> detect_colors(ArrayList<Mat> colors){
+        ArrayList<String> colors_names=new ArrayList<String>();
+        for(int i=0;i<colors.size();i++){
+            Mat src = colors.get(i);
+            Mat dest = new Mat(src.rows(), src.cols(), CvType.CV_8UC2);//copy the input to dest matrix
+            Imgproc.cvtColor(src, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
+            String colorname_maxarea="";int maxarea=0;
+            for (int j = 0; j < COLOR_BOUNDS.length; j++) {
+                Mat mask = new Mat(src.rows(), src.cols(), CvType.CV_8UC2);//create mask has src dimensions
                 Core.inRange(dest, COLOR_BOUNDS[j][0], COLOR_BOUNDS[j][1], mask);//perform inrange to j range color
-                Imgcodecs.imwrite(out_path, mask);
-            }
-        }
-       /* Mat source = Imgcodecs.imread("black.png");//read input image
-        Mat dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        Mat mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/black.png", mask);
-
-         source = Imgcodecs.imread("blue.png");//read input image
-         dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-         mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/blue.png", mask);
-
-        source = Imgcodecs.imread("brown.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/brown.png", mask);
-
-        source = Imgcodecs.imread("gold.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/gold.png", mask);
-
-        source = Imgcodecs.imread("green.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/green.png", mask);
-
-        source = Imgcodecs.imread("grey.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/grey.png", mask);
-
-        source = Imgcodecs.imread("orange.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/orange.png", mask);
-
-        source = Imgcodecs.imread("red.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/red.png", mask);
-
-        source = Imgcodecs.imread("silver.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/silver.png", mask);
-
-        source = Imgcodecs.imread("violet.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/violet.png", mask);
-
-        source = Imgcodecs.imread("white.png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/white.png", mask);
-
-        source = Imgcodecs.imread((String)names[0]+".png");//read input image
-        dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-        mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-        Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-        Imgcodecs.imwrite("out/yellow.png", mask);
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-        /*for(int i=0;i<names.length;i++){
-            String in_path=path+"\\in\\"+names[i]+".png";
-            String out_path=path+"\\out\\"+names[i]+"_input_"+"black_range"+".png";
-            Mat source = Imgcodecs.imread(String.valueOf(names[0]));//read input image
-            Mat dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//copy the input to dest matrix
-            Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);//convert from BGR to HSV
-            Mat mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);//create mask has source dimensions
-            Core.inRange(dest, COLOR_BOUNDS[0][0], COLOR_BOUNDS[0][1], mask);//perform inrange to black range
-            Imgcodecs.imwrite("out.png", mask);
-        }*/
-
-        /* Cropping rectangles*/
-//        int numOfTests=9;
-//        for(int i=1;i<=numOfTests;i++)
-//        {
-//            Mat source = Imgcodecs.imread("resisto"+i+".jpg");
-//            Mat dest=new Mat();
-//            try {
-//                dest= findRectangle(source);
-//                Imgcodecs.imwrite("output"+i+".jpg", dest);
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-        Mat source = Imgcodecs.imread("resisto9.jpg");
-        ArrayList<Mat> colors=new ArrayList<>();
-        try {
-            colors=findRectangle(source);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        //*************************************************here*************************************************************/
-
-        /*Mat source =
-                Imgcodecs.imread("resisto1.jpg");
-        Mat dest = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);
-        Imgproc.cvtColor(source, dest, Imgproc.COLOR_BGR2HSV);
-        Mat mask = new Mat(source.rows(),source.cols(),CvType.CV_8UC2);
-
-        SortedMap<Integer, Integer> colors_location =
-                new TreeMap<Integer, Integer>();
-        int area;
-        for(int i = 0; i < NUM_CODES; i++) {
-
-            Core.inRange(dest, COLOR_BOUNDS[i][0], COLOR_BOUNDS[i][1], mask);
-            List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-            //System.out.println("for i=" + i + ", size= " + contours.size());
-            Imgcodecs.imwrite("mask\\"+names[i]+".png", mask);
-            System.out.println("Color= "+ names[i]+", size= "+contours.size());
-            for (int contIdx = 0; contIdx < contours.size(); contIdx++) {
-                area = (int) Imgproc.contourArea(contours.get(contIdx));
-                int cx;
-                Moments M = Imgproc.moments(contours.get(contIdx));
-                cx = (int) (M.get_m10() / M.get_m00());
-                if (area>200 && area<800){
-
-                    colors_location.put(cx, i);
-                    //System.out.println("    area= " + area+",cx= "+cx);
+                List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+                Mat hierarchy = new Mat();
+                Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+                if(j==0 && contours.size()==2){
+                    continue;
                 }
-                System.out.println("    area= " + area+",cx= "+cx);
-            }
-        }
-
-        Set s = colors_location.entrySet();
-        // Using iterator in SortedMap
-        Iterator i = s.iterator();
-		while (i.hasNext())
-        {
-            Map.Entry m = (Map.Entry)i.next();
-
-            int key = (Integer)m.getKey();
-            int value = (Integer)m.getValue();
-
-            System.out.println("Key : " + key +
-                    "  value : " + value);
-        }*/
-        /*List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        Mat hierarchy = new Mat();
-        Core.inRange(dest,COLOR_BOUNDS[4][0],COLOR_BOUNDS[4][1], mask);
-        Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-        for (int contIdx = 0; contIdx < contours.size(); contIdx++) {
-            area = (int) Imgproc.contourArea(contours.get(contIdx));
-            Moments M = Imgproc.moments(contours.get(contIdx));
-            int cx = (int) (M.get_m10() / M.get_m00());
-            if (area>20){
-
-                colors_location.put(cx, 5);
-            }
-            System.out.println("for cx=" + cx + ", area= " + area);
-        }
-       /* for (int i = 0; i < contours.size(); i++) {
-            Imgproc.drawContours(mask, contours, i, new Scalar(0, 0, 255), -1);
-        }*/
-
-
-/*
-        Set s = colors_location.entrySet();
-        // Using iterator in SortedMap
-        Iterator i = s.iterator();
-
-        // Traversing map. Note that the traversal
-        // produced sorted (by keys) output .
-
-            /*if (() > 20)
-            {
-
-
-                // if a colour band is split into multiple contours
-                // we take the largest and consider only its centroid
-                boolean shouldStoreLocation = true;
-                for(int locIdx = 0; locIdx < _locationValues.size(); locIdx++)
-                {
-                    if(Math.abs(_locationValues.keyAt(locIdx) - cx) < 10)
-                    {
-                        if (areas.get(_locationValues.keyAt(locIdx)) > area)
-                        {
-                            shouldStoreLocation = false;
-                            break;
-                        }
-                        else
-                        {
-                            _locationValues.delete(_locationValues.keyAt(locIdx));
-                            areas.delete(_locationValues.keyAt(locIdx));
-                        }
-                    }
+                int area=0;
+                for (int contIdx = 0; contIdx < contours.size(); contIdx++) {
+                    area += (int) Imgproc.contourArea(contours.get(contIdx));
                 }
-
-                if(shouldStoreLocation)
-                {
-                    areas.put(cx, area);
-                    _locationValues.put(cx, i);
+                if(area>maxarea){
+                    colorname_maxarea=names[j];
+                    maxarea=area;
                 }
-            }*/
-/*
-        Imgcodecs.imwrite("output.jpg", mask);
-        //processFrame(source);
-        Mat destination = new Mat(source.rows(), source.cols(), source.type());
-/*
-        // applying brightness enhacement
-        source.convertTo(destination, -1, 1, 50);
+                //System.out.println("for i= "+i+", Color= "+ names[j]+", size= "+contours.size());
 
-        // output image
-        Imgcodecs.imwrite("output.jpg", destination);*/
+                //System.out.println("for i= "+i+", Color= "+ names[j]+", area= "+area+", size= "+contours.size());
+            }
+            //System.out.println("Color= "+ colorname_maxarea);
+            colors_names.add(colorname_maxarea);
+            //System.out.println("-------------------------------");
+        }
+        return colors_names;
+    }
+	
+    public static void main(String[] args){
+       System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        Mat source = Imgcodecs.imread("tests/r4.jpg");
+        ArrayList<Mat> colors=findRectangle(source);
+        System.out.println(colors.size());
+        ArrayList<String> colors_names=detect_colors(colors);
+        for(int i=0;i<colors_names.size();i++) System.out.println(colors_names.get(i));
+      
     }
 }
