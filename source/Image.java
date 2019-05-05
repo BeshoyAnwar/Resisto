@@ -238,7 +238,93 @@ public class Image {
         this.colorsNames=colorsNames;
     }
 
+private void removebackground()
+    {
+        Mat img=this.cuttedImage;
+        System.out.println("Image Loaded");
+        Mat dst = new Mat();
 
+        Mat thresholdImg = new Mat();
+
+
+        Imgproc.cvtColor(img, dst, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.threshold(dst, thresholdImg,120,255, Imgproc.THRESH_BINARY_INV);
+
+        Mat kernel = Mat.ones(10,10, CvType.CV_32F);
+        Imgproc.morphologyEx(thresholdImg, thresholdImg, Imgproc.MORPH_OPEN, kernel ,new Point(-1, -1), 2);
+        Imgproc.dilate(thresholdImg, thresholdImg, kernel,new Point(-1, -1), 2);
+        Imgproc.erode(thresholdImg, thresholdImg, kernel);
+
+        // create the new image
+        Mat foreground = new Mat(img.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+        img.copyTo(foreground, thresholdImg);
+
+        Mat grayMat = new Mat();
+        Mat cannyEdges = new Mat();
+        Mat threshold = new Mat();
+        Mat hierarchy = new Mat();
+
+        List<MatOfPoint> contourList = new ArrayList<MatOfPoint>(); //A list to store all the contours
+      
+        Imgproc.cvtColor(foreground, grayMat, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.threshold(grayMat, threshold,130,200, Imgproc.THRESH_BINARY_INV);
+        Imgproc.findContours(threshold,contourList, hierarchy,Imgproc.RETR_TREE,Imgproc.CHAIN_APPROX_SIMPLE);
+
+        MatOfPoint max_contour = new MatOfPoint();
+        Iterator<MatOfPoint> iterator = contourList.iterator();
+
+        MatOfPoint contour = iterator.next();
+        double area = Imgproc.contourArea(contour);
+        double maxArea = area;
+        int contindex =0 ;
+        int max_contindex =contindex ;
+        while (iterator.hasNext()){
+            System.out.println(area);
+            contour = iterator.next();
+            contindex ++ ;
+            area = Imgproc.contourArea(contour);
+            //if((area < maxArea && area >1000) ||(area > maxArea && maxArea <1000)){
+            if(area > maxArea ){
+                System.out.println("if");
+                System.out.println(area);
+                System.out.println(maxArea);
+                maxArea = area;
+                max_contindex = contindex ;
+                max_contour = contour ;
+
+            }
+            //System.out.println(max_contindex);
+            //System.out.println(area);
+
+
+
+        }
+        System.out.println(maxArea);
+        System.out.println("done");
+        //Rect r = Imgproc.boundingRect(max_contour);
+        Rect r = Imgproc.boundingRect(contourList.get(max_contindex));
+        double height = r.height;
+        double width = r.width;
+        //Rect min_r = Imgproc.minAreaRect(contourList.get(max_contindex));
+        //double our_area = r.area();
+        //Point center = new Point(r.x + (r.width / 2), r.y + (r.height / 2));
+        //Mat crop_img = new Mat(, CvType.CV_8UC3, new Scalar(255, 255, 255));
+        //Mat crop_img = new Mat(foreground,Range(Integer.valueOf(r.y),Integer.valueOf(r.y+r.height)) , Range(r.x,r.x+r.width));
+        Mat crop_img = img.submat((int) (r.y+(0.05*height)), (int) (r.y+(0.9*height)), (int) (r.x+(0.20*width)), (int) (r.x+(0.80*width)));
+        //Rect r = Imgproc.boundingRect(max_contour);
+        //Mat crop_img = img.submat((int) r.y, (int) r.y+r.height, (int) (r.x), (int) (r.x+r.width));
+        Imgproc.drawContours(foreground, contourList, -1, new Scalar(255, 0, 0), 2);
+        Mat crop_img_sharp = new Mat(crop_img.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+        crop_img_sharp= crop_img;
+
+        //Imgproc.GaussianBlur(crop_img, crop_img_sharp, new Size(0, 0), 1);
+        //Core.addWeighted(crop_img, 1, crop_img_sharp, 1, 0, crop_img_sharp);
+
+        //crop_img_sharp.convertTo(crop_img_sharp,CvType.CV_8UC3,1.2 , 50);
+        //return foreground;
+        this.resistorBody=crop_img_sharp;
+    }
+    
     private static double angle(Point p1, Point p2, Point p0) {
         double dx1 = p1.x - p0.x;
         double dy1 = p1.y - p0.y;
