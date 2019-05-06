@@ -63,12 +63,11 @@ public class Image {
     public ArrayList<Mat> getColorsImages() {
         return colorsImages;
     }
-    
+    /** 
+    * Remove background from the image and extract the resistor body 
+    */
     private void setResistorBody()
     {
-        /** 
-        Remove background from the image and extract the resistor body 
-        */
         Mat img=this.cuttedImage;
         Mat dst = new Mat();
         Mat thresholdImg = new Mat();
