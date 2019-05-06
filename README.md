@@ -12,13 +12,19 @@
 
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
+- [Installation](#installation)
 - [Team members roles](#team-members-roles)
 - [Steps of our work](#steps-of-our-work)
 - [References](#references)
+- [Demo video](#demo-video)
 
 ## Description
-Resisto is mobile application, you can use it by simply provide an image of your resistor and you will know the value of this resistor from Resisto application<br />
-The Resisto app uses the color key which is provided on the resistor to know what the value is<br />
+Resisto is a mobile application, you can use it by simply provide an image of your resistor and you will know the value of this resistor from Resisto application.<br />
+The Resisto app uses the color key which is provided on the resistor to know its value.<br />
+
+## Installation
+download our [apk](https://github.com/ETBMina/Resisto/releases/download/v1.0/Resisto.apk) and install it on your android mobile
+
 ## Team members roles
 | Member name   |  Role         |
 | ------------- | ------------- |
@@ -42,6 +48,8 @@ The taken photo will look like that <br />
 5- use the colors to calculate the resistance value <br />
 ![result](https://github.com/ETBMina/Resisto/blob/master/test/result.jpg) <br />
 
+## Demo video
+Check our [demo video](https://www.youtube.com/watch?v=di8VYU7bFb0&feature=youtu.be)
 
 ## References 
-color code from [here](http://www.resistorguide.com/resistor-color-code/)
+how to calculate the resistor value from its colors from [here](http://www.resistorguide.com/resistor-color-code/)
