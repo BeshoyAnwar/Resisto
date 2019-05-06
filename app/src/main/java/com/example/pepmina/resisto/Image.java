@@ -1,5 +1,7 @@
 package com.example.pepmina.resisto;
 
+import android.graphics.Bitmap;
+
 import org.opencv.android.Utils;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -159,7 +161,7 @@ public class Image {
     /**
      * This method detect the colors in the resistance body, extract them and set them in the colorsImages attribute.
      */
-    public void setColorsImages() {
+    private void setColorsImages() {
         Mat src=resistorBody;
         Mat resistance=src.clone();
         //blurring the image
