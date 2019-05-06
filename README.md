@@ -1,4 +1,3 @@
-# Resisto
 <p align="center">
   <h1 align="center"> Resisto </h1>
 </p>
