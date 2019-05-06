@@ -19,7 +19,6 @@ public class Resistance {
             put("Violet",  7);
             put("Grey"  ,  8);
             put("White", 9);
-
             put("Gold", -1);
             put("Silver", -2);
         }
@@ -134,10 +133,15 @@ public class Resistance {
      * and calculate resistance , tolerance and temperature coeff. 
      */
     private void runAlgorithm() {
+        /*
+        this switch is used to identify the type of resistance according to the number of bands 
+        and according to that it calculates resistance value , tolerance and
+        temperature coeffent "if it exists"
+        */
         switch (colours.size()) {
-            case 3:
-                value = calculateValue( 3 );
-                tolerance = ToleranceValues.get("None") ;
+            case 3://3 bands
+                value = calculateValue( 3 );//resistance calculation as 2 band values and a multplier value
+                tolerance = ToleranceValues.get("None") ;//calculate the tolerance
                 break;
             case 4:
                 value = calculateValue( 3 );
@@ -150,7 +154,7 @@ public class Resistance {
             case 6:
                 value = calculateValue( 4 );
                 tolerance = ToleranceValues.get(colours.get(4)) ;
-                tempCoeff = TempCoeffValues.get(colours.get(5));
+                tempCoeff = TempCoeffValues.get(colours.get(5));//calculate the temperature coeff.
                 break;
             default:
                 System.out.println("problem");
@@ -167,11 +171,14 @@ public class Resistance {
      */
     public String toString() {
         String value;
+        /*
+        this if condition is used to categorize the limits in each resistance value"lower limit"
+        */
         if(this.value >1000000000)
         {
-            value = String.valueOf(this.value /1000000000) ;
+            value = String.valueOf(this.value /1000000000) ;//divide to add the unit
             if(value.charAt(value.length()-1)=='0')
-                value = value.substring(0,value.length()-2)+" G";
+                value = value.substring(0,value.length()-2)+" G";// add unit to string
             else
                 value+=" G";
         }
@@ -208,12 +215,23 @@ public class Resistance {
      */
     private Double calculateValue(Integer Rotations ) {
         Double resistance = 0.0 ;
+        /*
+        this is the most important part of the algorthism it calculates the band values together 
+        so that they can be multipled by the multplier
+        it multplies the value with 0 and then adds the value to the units.
+        */
         for (int i=0;i<Rotations-1;i++)
         {
             resistance *= 10;
             resistance += BandValueAndMultiplierValues.get(colours.elementAt(i));
         }
-        Integer MultplierPower = BandValueAndMultiplierValues.get(colours.elementAt(Rotations-1));
+        Integer MultplierPower = BandValueAndMultiplierValues.get(colours.elementAt(Rotations-1));//multplier
+        //this is a very important part
+        /*
+        because of the fact that dividing a double by a double gives a wrong value in some cases i had to use a special case 
+        for the division by 10 and by 100 .
+        in the rest of the cases it is just multplication
+        */
         switch(  MultplierPower )
         {
             case -1:
