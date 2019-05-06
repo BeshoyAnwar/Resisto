@@ -12,7 +12,9 @@ public class Resistance {
             put("Yellow",  0.001);
         }
     };*/
-    /*band value and multplier value*/
+   /** band value and multplier value.
+    * according to the colour code .
+    */
     public HashMap<String,Integer> BandValueAndMultiplierValues = new HashMap<String, Integer>() {
         {
             put("Black" ,  0);
@@ -30,7 +32,9 @@ public class Resistance {
             put("Silver", -2);
         }
     };
-    /* Temperature coefficient in parts-per-million per degree Kelvin. */
+   /** Temperature coefficient in parts-per-million per degree Kelvin.
+    *  according to the colour code .
+    */
     public HashMap<String,Integer> TempCoeffValues = new HashMap<String, Integer>() {
         {
             put("Black" ,  250);
@@ -44,7 +48,9 @@ public class Resistance {
             put("Grey"  ,  1);
         }
     };
-    /* value tolerance in +/- %. */
+   /** values of tolerance in +/- %.   
+    *  according to the colour code .
+    */
     public HashMap<String,Double> ToleranceValues = new HashMap<String, Double>() {
         {
             put("Brown",   1.0);
@@ -58,41 +64,86 @@ public class Resistance {
             put("None",   20.0);
         }
     };
+    //colours given to the algorthism.
     private Vector<String> colours;
+    // value of the resistance.
     private Double value;
+    //tolerance of the resistance.
     private Double tolerance;
+    //temperature coeffent of the resistance.
     private Integer tempCoeff;
     //private Double FailRate ;
     //private Double Min ;
     //private Double Max ;
 
-
+    /**
+     * Resistance constructor that set the colours and runs the algorthsim to get the value of resistance .
+     * @param colours: The input colours for the algorthism .
+     * 
+     */
     public Resistance(Vector<String> colours) {
         this.colours = colours;
         this.runAlgorithm();
     }
-
+    /**
+     * getter function that return the value of the resistance 
+     * according to the colours given and the colour code.
+     * @return value
+     */
     public Double getValue() {
         return value;
     }
+    /**
+     * getter function that return the value of the tolerance
+     * according to the colours given and the colour code.
+     * @return tolerance
+     */
     public Double getTolerance() {
         return tolerance;
     }
+    /**
+     * getter function that return the value of the temperature coeffent 
+     * according to the colours given and the colour code. 
+     * @return value
+     */
     public Integer getTempCoeff() {
         return tempCoeff;
     }
+    /**
+     * setter function that sets the colours 
+     * but you must call the algorthism function to get the resistance,tolerance and temperature coeffent value .
+     * @param colours : colours in the object
+     */
     public void setColours(Vector<String> colours) {
         this.colours = colours;
     }
+    /**
+     * getter function that return the value of the colours stored in it 
+     *  
+     * @return colours
+     */
     public Vector<String> getColours() {return colours; }
-
+    /**
+     * function used to check whether there is a temperature coeffent or not for this resistance
+     * 
+     * @return flag
+     */
     private boolean tempCoeffExist(){
         if(colours.size()==6)
             return true ;
         else
             return false ;
     }
+    /**
+     * function used to print colours in the object
+     */
     public void printColours() {System.out.println(colours); }
+    /**
+     * The runAlgorithm function is the main Algorithm for the colour code.
+     * it has helper functions like "calculateValue" and "toString".
+     * it separates the reistance to types 
+     * and calculate resistance , tolerance and temperature coeff. 
+     */
     private void runAlgorithm() {
         switch (colours.size()) {
             case 3:
@@ -118,6 +169,13 @@ public class Resistance {
         }
         //to_string();
     }
+    /**
+     * The toString function has the job of  calculating the value of the resistance with units and return it as string :
+     * G :Giga.
+     * M :Mega.
+     * K :Kilo.
+     * @return value of the  resistance as string with it's unit.
+     */
     public String toString() {
         String value;
         if(this.value >1000000000)
@@ -154,6 +212,11 @@ public class Resistance {
         value += "Ohms";
         return value;
     }
+    /**
+     * The calculateValue function has the job of calculating the value of the resistance according to the colour code :
+     * @param Rotations : it is the number of digits in the resistance used by the colour code
+     * @return resistance value .
+     */
     private Double calculateValue(Integer Rotations ) {
         Double resistance = 0.0 ;
         for (int i=0;i<Rotations-1;i++)
