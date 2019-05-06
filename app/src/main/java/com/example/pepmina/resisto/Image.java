@@ -1,3 +1,6 @@
+package com.example.pepmina.resisto;
+
+import org.opencv.android.Utils;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -35,12 +38,12 @@ public class Image {
             "White",
             "Yellow"
     };
-    
+
     private Mat cuttedImage;
     private Mat resistorBody;
     private ArrayList<Mat> colorsImages;
     private Vector<String> colorsNames;
-    
+
     /**
      * Image constructor that set all attributes of the Image object (resistorBody ,colorsImages and colorsNames)
      * @param cuttedImage: The image bounded by the rectangle drawn in the camera
@@ -60,7 +63,7 @@ public class Image {
     public Mat getResistorBody() {
         return resistorBody;
     }
-    
+
     /**
      * getter function that return the colors images that has been cropped from body of the resistor
      * @return colorsImages
@@ -68,7 +71,7 @@ public class Image {
     public ArrayList<Mat> getColorsImages() {
         return colorsImages;
     }
-    
+
     /**
      * getter function that return the colors names that has been cropped from body of the resistor
      * @return colorsNames
@@ -77,8 +80,8 @@ public class Image {
         return colorsNames;
     }
 
-    /** 
-    * Remove background from the image and extract the resistor body 
+    /**
+    * Remove background from the image and extract the resistor body
     */
     private void setResistorBody()
     {
@@ -145,7 +148,7 @@ public class Image {
         Rect r = Imgproc.boundingRect(contourList.get(maxContIndex));
         double height = r.height;
         double width = r.width;
-  
+
         Mat cropImg = img.submat((int) (r.y+(0.05*height)), (int) (r.y+(0.9*height)), (int) (r.x+(0.20*width)), (int) (r.x+(0.80*width)));
 
         this.resistorBody=cropImg;
@@ -188,7 +191,7 @@ public class Image {
             for (int t = 0; t < thresholdLevel; t++) {
                 if (t == 0) {
                     // Apply edge detection
-                    Imgproc.Canny(gray0, gray, 10, 30, 3, true); // true ?
+                    Imgproc.Canny(gray0, gray, 10, 30, 3, true);
                     // create two vertical lines at the edge of the image
                     Point p1=new Point(0,0);
                     Point p2=new Point(0,gray.height());
@@ -206,7 +209,7 @@ public class Image {
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1); // 1
+                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1);
                 } else {
                     Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
                             Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -257,7 +260,7 @@ public class Image {
         // set colorsImages attribute to colors
         this.colorsImages= colors;
     }
-    
+
     /**
      * setter function that detect the color of each image in colorImages and change the colorNames attribute
      */
@@ -305,7 +308,7 @@ public class Image {
      * @param range the range in which contour should not be repeated
      * @return Boolean of whether there is a contour in the same range or not
      */
-    public static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
+    private static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
         // looping the y-coordinate of the colors contours
         for (Double contour : existingContours) {
             // test if the y-coordinate of the new contour is between the y-coord. of the accepted contour+ range and - range, then return true
@@ -322,7 +325,7 @@ public class Image {
      * @param countours TreeMap of key, the y-coordinate of the color and value, the contour of the color.
      * @return ArrayList of the images of the colors cropped
      */
-    public static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
+    private static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
         // the returned colors ArrayList
         ArrayList<Mat> colors = new ArrayList<>();
         //looping the drawn contours in the resistance image
@@ -369,6 +372,5 @@ public class Image {
         Utils.matToBitmap(matImg, bmp);
         return bmp;
     }
-
 
 }

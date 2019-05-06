@@ -3,4 +3,7 @@
     <string name="TakePhotoButton">Take Photo</string>
     <string name="PickFromGalleryButton">Pick From Gallery</string>
     <string name="ImageVIew">Picture</string>
+    <string name="opencv_camera">Open Camera</string>
+    <string name="instructions">* Place the resistor horizontally inside the rectangle with tolerance ring to the right *</string>
+    <string name="Gallery">Gallery</string>
 </resources>

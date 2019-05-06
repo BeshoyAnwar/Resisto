@@ -1,3 +1,4 @@
+package com.example.pepmina.resisto;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -172,4 +173,3 @@ public class Resistance {
         }
     }
 }
-

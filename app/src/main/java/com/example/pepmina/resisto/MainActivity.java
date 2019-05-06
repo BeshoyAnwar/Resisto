@@ -1,5 +1,6 @@
 package com.example.pepmina.resisto;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,21 +9,60 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
+
+import static com.example.pepmina.resisto.Image.convertMatToBitmap;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_GET_SINGLE_FILE =0;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final String TAG = MainActivity.class.getSimpleName();
     ImageView buckysImageView;
 
+
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i("OpenCV", "OpenCV loaded successfully");
+                    Mat mat=new Mat();
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         final Button pickFromGalleryButton = findViewById(R.id.pickFromGalleryButton);
         Button buckyButton = (Button) findViewById(R.id.captureButton);
         buckysImageView = (ImageView) findViewById(R.id.imageView);
+
+        ImageView imageView=findViewById(R.id.imageView);
+
         //Disable the button if the user has no camera
         if(!hasCamera())
             buckyButton.setEnabled(false);
@@ -53,7 +96,46 @@ public class MainActivity extends AppCompatActivity {
                 launchCamera(v);
             }
         });
+
+        //embedded camera
+        Dexter.withActivity(this)
+                .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if(!report.areAllPermissionsGranted()){
+                            Toast.makeText(MainActivity.this, "You need to grant all permission to use this app features", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+
+                    }
+                })
+                .check();
+        Button startButton = (Button)findViewById(R.id.start_button);
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cvIntent = new Intent(MainActivity.this, OpenCVCamera.class);
+                startActivity(cvIntent);
+            }
+        });
     }
+
+    public void onResume()
+    {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
     //Check if the user has a camera
     private boolean hasCamera(){
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
@@ -91,10 +173,38 @@ public class MainActivity extends AppCompatActivity {
                         File f = new File(path);
                         selectedImageUri = Uri.fromFile(f);
                     }
-                    // Set the image in ImageView
-                    ImageView imageView=findViewById(R.id.imageView);
-                    imageView.setImageURI(selectedImageUri);
-                    //ImageView((ImageView) findViewById(R.id.imageView)).setImageURI(selectedImageUri);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                    bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    Mat mat = new Mat();
+                    Utils.bitmapToMat(bitmap, mat);
+                    AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+                    dlgAlert.setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //dismiss the dialog
+                                }
+                            });
+                    dlgAlert.setTitle("Resisto");
+                    Image a= null;
+                    try {
+                        a = new Image(mat);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    int noOfColors=a.getColorsImages().size();
+                    if(noOfColors>=3)
+                    {
+                        Vector<String> colors=a.getColorsNames();
+                        Resistance r=new Resistance(colors);
+                        dlgAlert.setMessage("Resistance value= "+r.toString());
+
+                    }
+                    else
+                    {
+                        dlgAlert.setMessage("Selected picture is incorrect, please select another one.");
+                    }
+                    dlgAlert.setCancelable(true);
+                    dlgAlert.create().show();
                 }
                 else if(requestCode == REQUEST_IMAGE_CAPTURE)
                 {
@@ -108,4 +218,16 @@ public class MainActivity extends AppCompatActivity {
             Log.e("FileSelectorActivity", "File select error", e);
         }
     }
+
+    public void saveImageToGallery(Bitmap img)
+    {
+        String savedImageURL = MediaStore.Images.Media.insertImage(
+                getContentResolver(),
+                img,
+                "Bird",
+                "Image of bird"
+        );
+    }
+
+
 }
