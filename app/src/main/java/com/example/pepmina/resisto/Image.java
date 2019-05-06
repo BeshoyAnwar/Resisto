@@ -223,7 +223,7 @@ public class Image {
             for (int t = 0; t < thresholdLevel; t++) {
                 if (t == 0) {
                     // Apply edge detection
-                    Imgproc.Canny(gray0, gray, 10, 30, 3, true); // true ?
+                    Imgproc.Canny(gray0, gray, 10, 30, 3, true);
                     // create two vertical lines at the edge of the image
                     Point p1=new Point(0,0);
                     Point p2=new Point(0,gray.height());
@@ -241,7 +241,7 @@ public class Image {
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1); // 1
+                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1);
                 } else {
                     Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
                             Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -350,7 +350,7 @@ public class Image {
      * @param range the range in which contour should not be repeated
      * @return Boolean of whether there is a contour in the same range or not
      */
-    public static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
+    private static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
         // looping the y-coordinate of the colors contours
         for (Double contour : existingContours) {
             // test if the y-coordinate of the new contour is between the y-coord. of the accepted contour+ range and - range, then return true
@@ -367,7 +367,7 @@ public class Image {
      * @param countours TreeMap of key, the y-coordinate of the color and value, the contour of the color.
      * @return ArrayList of the images of the colors cropped
      */
-    public static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
+    private static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
         // the returned colors ArrayList
         ArrayList<Mat> colors = new ArrayList<>();
         //looping the drawn contours in the resistance image
