@@ -1,5 +1,4 @@
 package com.example.pepmina.resisto;
-import android.graphics.Bitmap;
 
 import org.opencv.android.Utils;
 import org.opencv.core.*;
@@ -9,16 +8,15 @@ import org.opencv.imgproc.Imgproc;
 import java.util.*;
 
 public class Image {
-    private static final int NUM_CODES = 12;
     // HSV colour bounds
     private static final Scalar COLOR_BOUNDS[][] = {
             {new Scalar(0, 0, 0), new Scalar(180, 250, 50)},        // black
             {new Scalar(98, 109, 20), new Scalar(112, 255, 255)},   // blue
-            {new Scalar(10, 100, 20), new Scalar(20, 255, 200)},    // brown//20 255 200
+            {new Scalar(10, 100, 20), new Scalar(20, 255, 200)},    // brown
             {new Scalar(20, 100, 100), new Scalar(25, 255, 255)},   // gold
             {new Scalar(45, 100, 50), new Scalar(75, 255, 255)},    // green
             {new Scalar(0, 0, 20), new Scalar(0, 0, 200)},          // grey
-            {new Scalar(5, 80, 100), new Scalar(20, 255, 255)},   // orange//11,100,100
+            {new Scalar(5, 80, 100), new Scalar(20, 255, 255)},   // orange
             {new Scalar(0, 100, 100), new Scalar(4, 255, 255)},     // red
             {new Scalar(0, 0, 200), new Scalar(0, 0, 230)},         // silver
             {new Scalar(100, 100, 255), new Scalar(150, 150, 255)}, // violet
@@ -40,44 +38,55 @@ public class Image {
             "White",
             "Yellow"
     };
-    // red wraps around in HSV, so we need two ranges
-    private static Scalar LOWER_RED1 = new Scalar(0, 100, 100);//done red and brown
-    private static Scalar UPPER_RED1 = new Scalar(10, 255, 255);
-    private static Scalar LOWER_RED2 = new Scalar(160, 100, 100);//has no detection bur keep it until test with real image
-    private static Scalar UPPER_RED2 = new Scalar(179, 255, 255);
 
     private Mat cuttedImage;
     private Mat resistorBody;
     private ArrayList<Mat> colorsImages;
     private Vector<String> colorsNames;
 
+    /**
+     * Image constructor that set all attributes of the Image object (resistorBody ,colorsImages and colorsNames)
+     * @param cuttedImage: The image bounded by the rectangle drawn in the camera
+     * @throws Exception
+     */
     public Image(Mat cuttedImage) throws Exception {
         this.cuttedImage=cuttedImage;
-        this.removebackground();
-        //this.resistorBody=resistorBody;
+        this.setResistorBody();
         setColorsImages();
         setColorsNames();
     }
 
-
+    /**
+     * getter function that return mat object cantain the body of the resistor only
+     * @return resistorBody
+     */
     public Mat getResistorBody() {
         return resistorBody;
     }
 
-    public void setResistorBody(Mat resistorBody) {
-        this.resistorBody = resistorBody;
-    }
-
+    /**
+     * getter function that return the colors images that has been cropped from body of the resistor
+     * @return colorsImages
+     */
     public ArrayList<Mat> getColorsImages() {
         return colorsImages;
     }
-    private void removebackground()
+
+    /**
+     * getter function that return the colors names that has been cropped from body of the resistor
+     * @return colorsNames
+     */
+    public Vector<String> getColorsNames() {
+        return colorsNames;
+    }
+
+    /**
+    * Remove background from the image and extract the resistor body
+    */
+    private void setResistorBody()
     {
         Mat img=this.cuttedImage;
-
-        System.out.println("Image Loaded");
         Mat dst = new Mat();
-
         Mat thresholdImg = new Mat();
 
 
@@ -90,101 +99,60 @@ public class Image {
         Imgproc.erode(thresholdImg, thresholdImg, kernel);
 
         // create the new image
-        Mat foreground = new Mat(img.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+        Mat foreground = new Mat(img.size(), CvType.CV_8UC3, new Scalar(255,255,255));
         List<Mat> bgr = new ArrayList<>();
-        List<Mat> masked_img = new ArrayList<>();
+        List<Mat> maskedImg = new ArrayList<>();
         Core.split(img, bgr);
         Core.bitwise_not(thresholdImg,thresholdImg);
-        Mat foreground_b = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255));
-        Mat foreground_g = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255));
-        Mat foreground_r = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255));
+        Mat foreground_b = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255,255,255));
+        Mat foreground_g = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255,255,255));
+        Mat foreground_r = new Mat(img.size(), CvType.CV_8UC1, new Scalar(255,255,255));
         Core.bitwise_and(bgr.get(0),thresholdImg,foreground_b);
         Core.bitwise_and(bgr.get(1),thresholdImg,foreground_g);
         Core.bitwise_and(bgr.get(2),thresholdImg,foreground_r);
-        masked_img.add(foreground_b);
-        masked_img.add(foreground_g);
-        masked_img.add(foreground_r);
-        Core.merge(masked_img, foreground);
-        //img.copyTo(foreground, thresholdImg);
-        //Core.bitwise_and(foreground,thresholdImg,foreground);
+        maskedImg.add(foreground_b);
+        maskedImg.add(foreground_g);
+        maskedImg.add(foreground_r);
+        Core.merge(maskedImg, foreground);
+
         Mat grayMat = new Mat();
         Mat cannyEdges = new Mat();
         Mat threshold = new Mat();
         Mat hierarchy = new Mat();
 
         List<MatOfPoint> contourList = new ArrayList<MatOfPoint>(); //A list to store all the contours
-       /*
-        Imgproc.cvtColor(foreground, grayMat, Imgproc.COLOR_BGR2GRAY);
 
-        Imgproc.Canny(foreground, cannyEdges, 100, 200);
-
-        //finding contours
-        Imgproc.findContours(cannyEdges, contourList, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-
-        Mat contours = new Mat();
-        contours.create(cannyEdges.rows(), cannyEdges.cols(), CvType.CV_8UC3);
-*/
-        /*Mat mask = getResistorAsMask (img);
-        Mat foreground = new Mat(img.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-        img.copyTo(foreground, mask);*/
         Imgproc.cvtColor(foreground, grayMat, Imgproc.COLOR_BGR2GRAY);
         Imgproc.threshold(grayMat, threshold,130,200, Imgproc.THRESH_BINARY_INV);
         Imgproc.findContours(threshold,contourList, hierarchy,Imgproc.RETR_TREE,Imgproc.CHAIN_APPROX_SIMPLE);
 
-        MatOfPoint max_contour = new MatOfPoint();
+        MatOfPoint maxContour = new MatOfPoint();
         Iterator<MatOfPoint> iterator = contourList.iterator();
 
         MatOfPoint contour = iterator.next();
         double area = Imgproc.contourArea(contour);
         double maxArea = area;
-        int contindex =0 ;
-        int max_contindex =contindex ;
+        int contIndex =0 ;
+        int maxContIndex =contIndex ;
         while (iterator.hasNext()){
-            System.out.println(area);
             contour = iterator.next();
-            contindex ++ ;
+            contIndex ++ ;
             area = Imgproc.contourArea(contour);
-            //if((area < maxArea && area >1000) ||(area > maxArea && maxArea <1000)){
+
             if(area > maxArea ){
-                System.out.println("if");
-                System.out.println(area);
-                System.out.println(maxArea);
                 maxArea = area;
-                max_contindex = contindex ;
-                max_contour = contour ;
-
+                maxContIndex = contIndex ;
+                maxContour = contour ;
             }
-            //System.out.println(max_contindex);
-            //System.out.println(area);
-
-
-
         }
-        System.out.println(maxArea);
-        System.out.println("done");
-        //Rect r = Imgproc.boundingRect(max_contour);
-        Rect r = Imgproc.boundingRect(contourList.get(max_contindex));
+        Rect r = Imgproc.boundingRect(contourList.get(maxContIndex));
         double height = r.height;
         double width = r.width;
-        //Rect min_r = Imgproc.minAreaRect(contourList.get(max_contindex));
-        //double our_area = r.area();
-        //Point center = new Point(r.x + (r.width / 2), r.y + (r.height / 2));
-        //Mat crop_img = new Mat(, CvType.CV_8UC3, new Scalar(255, 255, 255));
-        //Mat crop_img = new Mat(foreground,Range(Integer.valueOf(r.y),Integer.valueOf(r.y+r.height)) , Range(r.x,r.x+r.width));
-        Mat crop_img = img.submat((int) (r.y+(0.05*height)), (int) (r.y+(0.9*height)), (int) (r.x+(0.20*width)), (int) (r.x+(0.80*width)));
-        //Rect r = Imgproc.boundingRect(max_contour);
-        //Mat crop_img = img.submat((int) r.y, (int) r.y+r.height, (int) (r.x), (int) (r.x+r.width));
-        Imgproc.drawContours(foreground, contourList, -1, new Scalar(255, 0, 0), 2);
-        Mat crop_img_sharp = new Mat(crop_img.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-        crop_img_sharp= crop_img;
 
-        //Imgproc.GaussianBlur(crop_img, crop_img_sharp, new Size(0, 0), 1);
-        //Core.addWeighted(crop_img, 1, crop_img_sharp, 1, 0, crop_img_sharp);
+        Mat cropImg = img.submat((int) (r.y+(0.05*height)), (int) (r.y+(0.9*height)), (int) (r.x+(0.20*width)), (int) (r.x+(0.80*width)));
 
-        //crop_img_sharp.convertTo(crop_img_sharp,CvType.CV_8UC3,1.2 , 50);
-        //return foreground;
-        this.resistorBody=crop_img_sharp;
+        this.resistorBody=cropImg;
+
 
     }
 
@@ -293,32 +261,27 @@ public class Image {
         this.colorsImages= colors;
     }
 
-    public Vector<String> getColorsNames() {
-        return colorsNames;
-    }
-
-    public void setColorsNames() {
+    /**
+     * setter function that detect the color of each image in colorImages and change the colorNames attribute
+     */
+    private void setColorsNames() {
         Vector<String> colorsNames=new Vector<>();
-        //final double MAX_AREA_PERCENTAGE =250.0/5000;
+        //loop over the colorImages to detect which color in each image
         for(int i=0;i<colorsImages.size();i++){
             Mat src = colorsImages.get(i);
-//            int area=src.rows()*src.width();
-//            System.out.println(area);
-//            //double maxAreaConst=MAX_AREA_PERCENTAGE*area;
-            //System.out.println(maxAreaConst);
-            Mat dest = new Mat(src.rows(), src.cols(), CvType.CV_8UC2);//copy the input to dest matrix
-            Imgproc.cvtColor(src, dest, Imgproc.COLOR_RGB2HSV_FULL);//convert from BGR to HSV
+            Mat dest = new Mat(src.rows(), src.cols(), CvType.CV_8UC2);//create dest image with same size of src image
+            Imgproc.cvtColor(src, dest, Imgproc.COLOR_RGB2HSV);//convert from RGB to HSV
+            // varaibles contain the maxarea contours and name of its color so that the image color will be the one which has the max area color
             String colorOfMaxArea="";int maxArea=0;
+            // loop over the 12 colors and get its contours to detect the color in the i-image
             for (int j = 0; j < COLOR_BOUNDS.length; j++) {
                 Mat mask = new Mat(src.rows(), src.cols(), CvType.CV_8UC2);//create mask has src dimensions
                 Core.inRange(dest, COLOR_BOUNDS[j][0], COLOR_BOUNDS[j][1], mask);//perform inrange to j range color
                 List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
                 Mat hierarchy = new Mat();
                 Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-//                if(j==0){
-//                    continue;
-//                }
                 int colorArea=0;
+                // sum the area of the contours to determine the area of the  j color
                 for (int contIdx = 0; contIdx < contours.size(); contIdx++) {
                     colorArea += (int) Imgproc.contourArea(contours.get(contIdx));
                 }
@@ -326,18 +289,13 @@ public class Image {
                     colorOfMaxArea= COLORS_NAMES[j];
                     maxArea=colorArea;
                 }
-                //System.out.println("for i= "+i+", Color= "+ COLORS_NAMES[j]+", size= "+contours.size());
-
-                System.out.println("for i= "+i+", Color= "+ COLORS_NAMES[j]+", area= "+colorArea+", size= "+contours.size());
             }
-            System.out.println("Color= "+ colorOfMaxArea);
             if(colorOfMaxArea!=""){
                 colorsNames.add(colorOfMaxArea);
             }
             else{
                 colorsNames.add("Black");
             }
-            System.out.println("-------------------------------");
         }
         this.colorsNames=colorsNames;
     }
