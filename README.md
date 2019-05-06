@@ -17,8 +17,8 @@
 - [References](#references)
 
 ## Description
-Resisto is mobile application, you can use it by simply provide an image of your resistor and you will know the value of this resistor from Resisto application.<br />
-The Resisto app uses the color key which is provided on the resistor to know what the value is.<br />
+Resisto is mobile application, you can use it by simply provide an image of your resistor and you will know the value of this resistor from Resisto application<br />
+The Resisto app uses the color key which is provided on the resistor to know what the value is<br />
 ## Team members roles
 | Member name   |  Role         |
 | ------------- | ------------- |
