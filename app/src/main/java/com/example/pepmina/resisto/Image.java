@@ -139,41 +139,33 @@ public class Image {
 
     }
 
-    private void setColorsImages() {
+    /**
+     * This method detect the colors in the resistance body, extract them and set them in the colorsImages attribute.
+     */
+    public void setColorsImages() {
         Mat src=resistorBody;
-//        Mat kernel=new Mat(3,3,CvType.CV_32S);
-//        kernel.put(0, 0,-1,-1,-1,-1,8,-1,-1,-1,-1 );
-//        //for(int i=0;i<3;i++)
-//          //  for(int j=0;j<3;j++)
-//            //{
-//                //if(i==1&&j==1) kernel[i][j] = 9;
-//              //  kernel.put(i, j, 9);
-//            //}
-//        Imgproc.filter2D(src,src,-1,kernel);
-//        Imgcodecs.imwrite("sharpen.jpg", src);
         Mat resistance=src.clone();
+        //blurring the image
         Mat blurred = src.clone();
         Imgproc.medianBlur(src, blurred, 9);
-
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
-
+        // create array list containing all contours in the image
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-
         List<Mat> blurredChannel = new ArrayList<Mat>();
         blurredChannel.add(blurred);
         List<Mat> gray0Channel = new ArrayList<Mat>();
         gray0Channel.add(gray0);
-
         MatOfPoint2f approxCurve;
-
+        // get the area of the image
         double imageArea=src.height()*src.width();
-        //3500 5500
-        //3000 5500
+        // Min. and Max. area percentage of the color contour
         double minArea = 3000.0/59411.0;
-        int maxId = -1;
         double maxArea=6500.0/59411.0;
+        // variable to calculate the number of colors in a resistance and initialize it with zero
         int numOfColorsInRes=0;
+        // TreeMap of the final accepted contours of the colors with y coordinate is the key
         TreeMap<Double,MatOfPoint> finalContours=new TreeMap<>();
+        // create array list containing the y coordinate of the accepted contours
         ArrayList<Double> yOfColors=new ArrayList<Double>();
         for (int c = 0; c < 3; c++) {
             int ch[] = { c, 0 };
@@ -181,16 +173,16 @@ public class Image {
             int thresholdLevel = 1;
             for (int t = 0; t < thresholdLevel; t++) {
                 if (t == 0) {
-                    //10 30 3 true
-                    //5 50
+                    // Apply edge detection
                     Imgproc.Canny(gray0, gray, 10, 30, 3, true); // true ?
-                    //Imgproc.Canny(gray0, gray, 15, 20);
+                    // create two vertical lines at the edge of the image
                     Point p1=new Point(0,0);
                     Point p2=new Point(0,gray.height());
                     Point p3=new Point(gray.width()-1,0);
                     Point p4=new Point(gray.width()-1,gray.height()-1);
                     Imgproc.line(gray,p1,p2,new Scalar(255, 255, 255),1);
                     Imgproc.line(gray,p3,p4,new Scalar(255, 255, 255),1);
+                    // dilate then erode to complete rectangles
                     Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
                     Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
                     Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
@@ -200,9 +192,7 @@ public class Image {
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
                     Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgcodecs.imwrite("edge"+c+".jpg", gray);
                     Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1); // 1
-                    // ?
                 } else {
                     Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
                             Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -210,54 +200,47 @@ public class Image {
                             (src.width() + src.height()) / 200, t);
                 }
 
+                // find all contours in the image
                 Imgproc.findContours(gray, contours, new Mat(),
-                        Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-                Imgcodecs.imwrite("gray.jpg", gray);
-
+                Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+                // loop every contour in the image
                 for (MatOfPoint contour : contours) {
                     MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
+                    // get the area of the contour
                     double area = Imgproc.contourArea(contour)/imageArea;
+                    // adjust the rectangle approximation
+                    // approxCurve is the edges of the contour
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
-                            Imgproc.arcLength(temp, true) * 0.05, true);
+             Imgproc.arcLength(temp, true) * 0.05, true);
+                    // get the contour start point
                     Point p=contour.toArray()[0];
+                    // get the y-coordinate of the point
                     double y=p.y;
+                    // test if the contour is considered a color contour
+                    // test if the contour has four edges
+                    // test if the area of the contour is between the minimum and maximum accepted area
+                    // test if we have't accepted a contour in the same location
                     if (approxCurve.total() == 4 && area >= minArea&& area<=maxArea&& !repeatedContour(yOfColors,y,contour.height())) {
-                        double maxCosine = 0;
+                        // increase number of colors in a resistance
                         numOfColorsInRes++;
+                        // add the y-coordinate of the contour to yOfColors
                         yOfColors.add(y);
+                        // put this contour and it's y-coordinate in the finalContour TreeMap
                         finalContours.put(y,contour);
+                        // get the index of the accepted contour
                         int id=contours.indexOf(contour);
+                        // draw the accepted contour to the resistance image
                         Imgproc.drawContours(src, contours, id, new Scalar(255, 0, 0, .8), 2);
-//                        List<Point> curves = approxCurve.toList();
-//                        for (int j = 2; j < 5; j++) {
-//
-//                            double cosine = Math.abs(angle(curves.get(j % 4),
-//                                    curves.get(j - 2), curves.get(j - 1)));
-//                            maxCosine = Math.max(maxCosine, cosine);
-//                        }
-//
-//                        if (maxCosine < 0.3) {
-//                            maxArea = area;
-//                            maxId = contours.indexOf(contour);
-//                        }
                     }
                 }
-                Imgcodecs.imwrite("output"+".jpg", src);
-
             }
         }
-        System.out.println(numOfColorsInRes);
+        // create array list of images of colors
         ArrayList<Mat> colors=new ArrayList<>();
+        // crop the colors from the resistance body and put them in the colors array list
         colors=cropColors(resistance,finalContours);
-        for(int i=0;i<numOfColorsInRes;i++)
-        {
-            Imgcodecs.imwrite("ColorNo"+(i+1)+".jpg", colors.get(i));
-        }
-        System.out.println(numOfColorsInRes);
-
-        //return colors;
-
+        // set colorsImages attribute to colors
         this.colorsImages= colors;
     }
 
@@ -311,18 +294,17 @@ public class Image {
     }
 
 
-    private static double angle(Point p1, Point p2, Point p0) {
-        double dx1 = p1.x - p0.x;
-        double dy1 = p1.y - p0.y;
-        double dx2 = p2.x - p0.x;
-        double dy2 = p2.y - p0.y;
-        return (dx1 * dx2 + dy1 * dy2)
-                / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2)
-                + 1e-10);
-    }
-
-    private static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
+    /**
+     * checks whether the new contour will interfere with a previous accepted contour
+     * @param existingContours the y-coordinate of the previous accepted contours
+     * @param newContour the y-coordinate of the new contour to be tested
+     * @param range the range in which contour should not be repeated
+     * @return Boolean of whether there is a contour in the same range or not
+     */
+    public static Boolean repeatedContour(ArrayList<Double> existingContours, Double newContour, int range) {
+        // looping the y-coordinate of the colors contours
         for (Double contour : existingContours) {
+            // test if the y-coordinate of the new contour is between the y-coord. of the accepted contour+ range and - range, then return true
             if (newContour >= contour - range && newContour <= contour + range) {
                 return true;
             }
@@ -330,23 +312,58 @@ public class Image {
         return false;
     }
 
-    private static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
+    /**
+     * extract the images of the colors from the resistance image with colors contours drawn.
+     * @param resistance the resistance image with colors contours drawn
+     * @param countours TreeMap of key, the y-coordinate of the color and value, the contour of the color.
+     * @return ArrayList of the images of the colors cropped
+     */
+    public static ArrayList<Mat> cropColors(Mat resistance, TreeMap<Double, MatOfPoint> countours) {
+        // the returned colors ArrayList
         ArrayList<Mat> colors = new ArrayList<>();
+        //looping the drawn contours in the resistance image
         for (Map.Entry<Double, MatOfPoint> contour : countours.entrySet()) {
-            //Mat mask=Mat.zeros(resistance.rows(),resistance.cols(),CvType.CV_8UC2);
-            Mat mask = new Mat();
-            Mat temp = new Mat();
-            Core.inRange(resistance, new Scalar(0, 0, 0), new Scalar(0, 0, 0), temp);
-            resistance.copyTo(mask, temp);
-            //Imgcodecs.imwrite("m.jpg", mask);
+            // create a black mask
+            Mat mask=Mat.zeros(resistance.rows(),resistance.cols(),16);
+            Core.inRange(resistance, new Scalar(0, 0, 0), new Scalar(0, 0, 0), mask);
+            // get a rectangle from the drawn contour
             Rect r = Imgproc.boundingRect(contour.getValue());
+            // draw the rectangle in the mask with white color
             Imgproc.rectangle(mask, r, new Scalar(255, 255, 255), -1);
-            Core.bitwise_and(resistance, mask, mask);
-            mask = mask.submat((int) r.y, (int) r.y+r.height, (int) (r.x), (int) (r.x+r.width));
+            Mat foreground = new Mat(resistance.size(), CvType.CV_8UC3, new Scalar(0,0,0));
+            List<Mat> bgr = new ArrayList<>();
+            List<Mat> masked_img = new ArrayList<>();
+            Core.split(resistance, bgr);
+            Mat foreground_b = new Mat(resistance.size(), CvType.CV_8UC1, new Scalar(0,0,0));
+            Mat foreground_g = new Mat(resistance.size(), CvType.CV_8UC1, new Scalar(0,0,0));
+            Mat foreground_r = new Mat(resistance.size(), CvType.CV_8UC1, new Scalar(0,0,0));
+            Core.bitwise_and(bgr.get(0),mask,foreground_b);
+            Core.bitwise_and(bgr.get(1),mask,foreground_g);
+            Core.bitwise_and(bgr.get(2),mask,foreground_r);
+            masked_img.add(foreground_b);
+            masked_img.add(foreground_g);
+            masked_img.add(foreground_r);
+            Core.merge(masked_img, foreground);
+            // crop the color from the image
+            mask = resistance.submat((int) r.y, (int) r.y+r.height, (int) (r.x), (int) (r.x+r.width));
+            // add the color to colors ArrayList
             colors.add(mask);
         }
-
+        //return colors ArrayList
         return colors;
+    }
+
+    /**
+     * convert Mat image to Bitmap image
+     * @param matImg the Mat image to be converted
+     * @return Corresponding Bitmap image
+     */
+    public static Bitmap convertMatToBitmap(Mat matImg)
+    {
+        Bitmap bmp = null;
+        bmp = Bitmap.createBitmap(matImg.cols(), matImg.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matImg, bmp);
+        return bmp;
     }
 
 
