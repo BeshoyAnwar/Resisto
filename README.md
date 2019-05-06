@@ -15,8 +15,8 @@
 - [Installation](#installation)
 - [Team members roles](#team-members-roles)
 - [Steps of our work](#steps-of-our-work)
-- [References](#references)
 - [Demo video](#demo-video)
+- [References](#references)
 
 ## Description
 Resisto is a mobile application, you can use it by simply provide an image of your resistor and you will know the value of this resistor from Resisto application.<br />
