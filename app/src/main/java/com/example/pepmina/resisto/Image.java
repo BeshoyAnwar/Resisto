@@ -202,16 +202,8 @@ public class Image {
                     Imgproc.line(gray,p1,p2,new Scalar(255, 255, 255),1);
                     Imgproc.line(gray,p3,p4,new Scalar(255, 255, 255),1);
                     // dilate then erode to complete rectangles
-                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
-                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
-                    Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)));
-                    Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(3,3)));
-                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1);
+                    Imgproc.dilate(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)),new Point(-1, -1),4);
+                    Imgproc.erode(gray,gray,Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(5,5)),new Point(-1, -1),4);
                 } else {
                     Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
                             Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
