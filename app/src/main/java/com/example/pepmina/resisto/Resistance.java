@@ -3,15 +3,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 public class Resistance {
-    /*//fail rate values
-    HashMap<String,Double> FailRate = new HashMap<String, Double>() {
-        {
-            put("Brown", 1.0);
-            put("Red" , 0.1);
-            put("Orange",  0.01);
-            put("Yellow",  0.001);
-        }
-    };*/
+    
    /** band value and multplier value.
     * according to the colour code .
     */
@@ -19,7 +11,7 @@ public class Resistance {
         {
             put("Black" ,  0);
             put("Brown", 1);
-            put("Red" , 2);  //"Orange","Yellow","Green","Blue","Violet","Grey"  ,"White",
+            put("Red" , 2);  
             put("Orange",  3);
             put("Yellow",  4);
             put("Green", 5);
@@ -39,7 +31,7 @@ public class Resistance {
         {
             put("Black" ,  250);
             put("Brown", 100);
-            put("Red" , 50);  //"Orange","Yellow","Green","Blue","Violet","Grey"  ,"White",
+            put("Red" , 50);  
             put("Orange",  15);
             put("Yellow",  25);
             put("Green", 20);
@@ -72,10 +64,7 @@ public class Resistance {
     private Double tolerance;
     //temperature coeffent of the resistance.
     private Integer tempCoeff;
-    //private Double FailRate ;
-    //private Double Min ;
-    //private Double Max ;
-
+    
     /**
      * Resistance constructor that set the colours and runs the algorthsim to get the value of resistance .
      * @param colours: The input colours for the algorthism .
@@ -167,7 +156,7 @@ public class Resistance {
                 System.out.println("problem");
                 break;
         }
-        //to_string();
+        
     }
     /**
      * The toString function has the job of  calculating the value of the resistance with units and return it as string :
